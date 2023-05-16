@@ -9,12 +9,37 @@ import {
   StyleSheet,
   // Image,
 } from "react-native";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 export default function SignInScreen({ setToken }) {
   const navigation = useNavigation();
-  const [username, setUsername] = useState("");
-  // const [password, setPassword] = useState("");
-  console.log(username);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [alert, setAlert] = useState("");
+
+  const handleSubmit = async () => {
+    // event.preventDefault();
+    if (!email || !password) {
+      setAlert("Please fill all fields");
+    } else {
+      const response = await axios.post(
+        "https://lereacteur-bootcamp-api.herokuapp.com/api/airbnb/user/log_in",
+        {
+          email: email,
+          password: password,
+        }
+      );
+      console.log(response);
+      if (response.status === "401") {
+        setAlert("Email or/and password incorrect");
+      }
+      console.log(response);
+      const userToken = response.data;
+      Cookies.set("airbnbToken", userToken, { expire: 7 });
+      setToken(userToken);
+    }
+  };
   return (
     <View>
       <View style={StyleSheet.blockConnect}>
@@ -27,26 +52,32 @@ export default function SignInScreen({ setToken }) {
       </View>
       <View style={StyleSheet.blockConnect}>
         <TextInput
-          placeholder="Username"
+          placeholder="Email"
           multiline={false}
           style={StyleSheet.inputConnect}
           onChangeText={(text) => {
-            setUsername(text);
+            setEmail(text);
           }}
-          value={username}
+          value={email}
         />
         <TextInput
           placeholder="Password"
           secureTextEntry={true}
           style={StyleSheet.inputConnect}
+          onChangeText={(text) => {
+            setPassword(text);
+          }}
+          value={password}
         />
       </View>
       <View style={StyleSheet.blockConnect}>
+        {alert && (
+          <Text style={[StyleSheet.text, StyleSheet.red]}>{alert}</Text>
+        )}
         <Button
           title="Sign in"
           onPress={async () => {
-            const userToken = "secret-token";
-            setToken(userToken);
+            handleSubmit();
           }}
         />
         <TouchableOpacity
@@ -54,7 +85,7 @@ export default function SignInScreen({ setToken }) {
             navigation.navigate("SignUp");
           }}
         >
-          <Text>No account ? Register</Text>
+          <Text style={StyleSheet.text}>No account ? Register</Text>
         </TouchableOpacity>
       </View>
     </View>
