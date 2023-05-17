@@ -41,16 +41,16 @@ export default function SignInScreen({ setToken }) {
             password: password,
           }
         );
-
+        console.log(response);
         if (response.data) {
           const userToken = response.data.token;
-          AsyncStorage.set("airbnbToken", userToken, { expire: 7 });
+          AsyncStorage.setItem("airbnbToken", userToken);
           setToken(userToken);
-        } else {
-          setAlert("Email or/and password incorrect");
         }
       }
     } catch (error) {
+      if (error.message === "Request failed with status code 401")
+        setAlert("Email or/and password incorrect");
       console.log(error.message);
     }
   };
@@ -102,7 +102,7 @@ export default function SignInScreen({ setToken }) {
             </TouchableHighlight>
           </View>
         </View>
-        <View style={styles.blockConnect}>
+        <View style={styles.blockSubmit}>
           {alert ? (
             <Text style={[styles.text, styles.red]}>{alert}</Text>
           ) : (
@@ -137,7 +137,7 @@ const useStyle = () => {
     container: {
       backgroundColor: "white",
       paddingTop: Constants.statusBarHeight,
-      // height: "0%",
+      height: "200%",
     },
 
     text: {
@@ -191,6 +191,7 @@ const useStyle = () => {
 
     inputPassword: {
       // paddingLeft: 10,
+      width: "80%",
       justifyContent: "flex-start",
     },
     hidePassword: {
